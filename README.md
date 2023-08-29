@@ -2,7 +2,8 @@
 Scripts which offer different types of analysis and data manipulation of PDB files. They can be used via the command-line or as a modules.
 
 # Goal
-PDB_Atom_Numbering.py: Numbers the atoms of all the atoms of the the PDB file or of a specific chain starting from a specific number. The atom numberings in CONNECT lines (if any) are not changed.
+PDB_Atom_Numbering.py:<br />
+Numbers the atoms of all the atoms of the the PDB file or of a specific chain starting from a specific number. The atom numberings in CONNECT lines (if any) are not changed.
 
 # Options
 ## Command-line
