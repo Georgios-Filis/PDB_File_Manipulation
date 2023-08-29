@@ -7,12 +7,12 @@ PDB_Atom_Numbering.py: Numbers the atoms of all the atoms of the the PDB file or
 
 # Options
 ## Command-line
-PDB_Atom_Numbering.py: <br />
--i / --input: The file path of the input PDB file. Default: None <br />
--c / --chain: The chain selected for atom numbering. Default: None (All atoms are renumbered.) <br />
--n / --number: The starting number for the atom numbering. It cannot be negative nor above 99999. Default: 1 <br />
+PDB_Atom_Numbering.py:<br />
+-i / --input: The file path of the input PDB file. Default: None<br />
+-c / --chain: The chain selected for atom numbering. Default: None (All atoms are renumbered.)<br />
+-n / --number: The starting number for the atom numbering. It cannot be negative nor above 99999. Default: 1<br />
 -o / --output: The path for the output file. Default: Input_File_Name (wihtout the PDB file extension) + "_Atom_Mod.pdb" 
 
 ## Module
-PDB_Atom_Numbering.py:
+PDB_Atom_Numbering.py:<br />
 atomnum(input, chain, number, output)
