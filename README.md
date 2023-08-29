@@ -15,4 +15,4 @@ PDB_Atom_Numbering.py:<br />
 
 ## Module
 PDB_Atom_Numbering.py:<br />
-atomnum(input, chain, number, output)
+atomnum(input, chain, number, output)<br />
