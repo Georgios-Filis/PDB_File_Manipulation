@@ -6,6 +6,8 @@ PDB_Atom_Numbering.py:<br />
 Numbers the atoms of all the atoms of the the PDB file or of a specific chain starting from a specific number. The atom numberings in CONNECT lines (if any) are not changed.
 
 # Options
+All scripts have been tested with Python 3.9.7.
+
 ## Command-line
 PDB_Atom_Numbering.py:<br />
 -i / --input: The file path of the input PDB file. Default: None<br />
