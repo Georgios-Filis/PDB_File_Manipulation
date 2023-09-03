@@ -13,7 +13,7 @@ def read_file(file_path):
     return lines
 
 
-def atomnum(input_path, chain, start_number, output_path):
+def chainnum(input_path, chain, start_number, output_path):
     if input_path is None:
         print("No input file was given or input path is wrong. Exiting.")
         exit()
@@ -23,7 +23,7 @@ def atomnum(input_path, chain, start_number, output_path):
         output_path = "{}_Chain_Mod.pdb".format(input_path_mod)
         print("File output path: {}".format(output_path))
 
-    if start_number < 0 or start_number > 99999:
+    if start_number < 0 or start_number > 9999:
         print("Starting number is negative or above 99999. Exiting.")
         exit()
     
@@ -90,4 +90,4 @@ if __name__ == "__main__":
                 arg_start_number = int(sys.argv[i+1])
             elif sys.argv[i] == "-o" or sys.argv[i] == "--output":
                 arg_output_path = sys.argv[i+1]
-    atomnum(arg_input_path, arg_chain, arg_start_number, arg_output_path)
+    chainnum(arg_input_path, arg_chain, arg_start_number, arg_output_path)
