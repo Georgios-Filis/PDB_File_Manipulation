@@ -10,6 +10,7 @@ Numbers the residues of all the chains of the the PDB file or of a specific chai
 
 # Options
 All scripts have been tested with Python 3.9.7.
+All scripts have been built for the "Atomic Coordinate Entry Format Description Version 3.30" of PDB.
 
 ## Command-line
 PDB_Atom_Numbering.py:<br />
@@ -30,4 +31,4 @@ PDB_Atom_Numbering.py:<br />
 atomnum(input, chain, number, output)<br />
 
 PDB_Chain_Numbering.py:<br />
-chainnum(input, chain, number, output)<br />
+chainnum(input, chain, missing_chains, number, output)<br />
