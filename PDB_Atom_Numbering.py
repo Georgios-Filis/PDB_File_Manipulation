@@ -1,4 +1,3 @@
-import re
 import sys
 
 
@@ -13,7 +12,7 @@ def read_file(file_path):
     return lines
 
 
-def atomnum(input_path, chain, start_number, output_path):
+def chainnum(input_path, chain, start_number, output_path):
     if input_path is None:
         print("No input file was given or input path is wrong. Exiting.")
         exit()
@@ -23,94 +22,99 @@ def atomnum(input_path, chain, start_number, output_path):
         output_path = "{}_Atom_Mod.pdb".format(input_path_mod)
         print("File output path: {}".format(output_path))
 
-    if start_number < 0 or start_number > 99999:
+    if start_number < 0 or start_number > 9999:
         print("Starting number is negative or above 99999. Exiting.")
         exit()
-
+    
+	# If the start_number is anything else but the default value, then subtract one in the beginning to start numbering from the selected value of the user.
+    if start_number != 0:
+        start_number -= 1
+            
     # A variable that holds the atom number.
-    atom_num = start_number
+    atom_num_counter = start_number
 
     # Open the new file.
     new_file = open(output_path, "w")
 
-    # Renumbers the atoms of all the atoms of the the PDB file or of a specific chain starting from a specific number.
-    # The pattern to find the lines with atom numbers and the specified chain (if any) which will be changed.
-    # The atom numberings in CONNECT lines (if any) do not change.
-    if arg_chain is None:
-        pattern_atom_1 = re.compile(r'^(ATOM|HETATM|ANISOU|TER)\s+\d+(.*)')
-    else:
-        pattern_atom_2 = re.compile(r'^(ATOM|HETATM|ANISOU)\s+\d+(\s+\S+\s+\S+\s+(\S+).*)')
-        pattern_atom_3 = re.compile(r'^(TER)\s+\d+(\s+(\S+).*)')
+    # Atomic Coordinate Entry Format Description Version 3.30
+    # Columns:
+    # 1 - 6  : Record name "ATOM "/"ANISOU"/"HETATM"
+    # 7 - 11 : Integer serial
+    # 13 - 16: Atom name
+    # 17     : Character altLoc
+    # 18 - 20: Residue name resName
+    # 22     : Character chainID
+    # 23 - 26: Integer resSeq
+    # 27     : AChar iCode
+    # ...
+    # The rest of the lines are not of use for the purposes of this script.
+    #
+    # TER:
+    # Columns:
+    # 1 - 6  : Record name "ATOM "/"ANISOU"/"TER   "
+    # 7 - 11 : Integer serial
+    # 18 - 20: Residue name resName
+    # 22     : Character chainID
+    # 23 - 26: Integer resSeq
+    # 27     : AChar iCode
+    # ...
+    # The rest of the lines are not of use for the purposes of this script.
+	# Example from a PDB file:
+    # Not missing chains:
+	# ATOM      1  N   ALA A   1      13.172 -16.346  -1.789  0.00 26.27           N  
+	# ATOM      2  CA  ALA A   1      13.663 -17.624  -2.403  0.00 26.40           C  
+	# ATOM      3  C   ALA A   1      13.627 -17.432  -3.877  1.00 25.43           C  
+    # TER       3      ALA A   1
+    # Missing chains:
+    # ATOM      1  N   THR     1      15.100  17.240  18.900  1.00  0.00           N
+    # ATOM      2  H   THR     1      15.040  17.240  17.900  1.00  0.00           H
+    # ATOM      3  CA  THR     1      14.870  18.580  19.440  1.00  0.00           C
+    # TER       3      THR     1
+    #
+    # Find the unique combinations of chain IDs and residue numbers.
+    # Correspond them to the new residues numbers.
+    # If a combination is found again use the correspondance to find its residue number.
     pdb_lines = read_file(input_path)
     for line in pdb_lines:
-        if arg_chain is None:
-            result_atom_nc = pattern_atom_1.search(line)
-            if result_atom_nc:
-                result_type = result_atom_nc.group(1)
-                line_end_part = result_atom_nc.group(2)
-                # Perform the change based on the starting atom number.
-                # The first label takes 6 positions. The atom number takes 5 positions.
-                if result_type == "ATOM":
-                    phrase = "ATOM  "
-                elif result_type == "HETATM":
-                    phrase = "HETATM"
-                elif result_type == "ANISOU":
-                    phrase = "ANISOU"
-                elif result_type == "TER":
-                    phrase = "TER   "
-                # If the current line is with teh ANISOU label then the atom number must remain the same as with the previous line,
-                # therefore the atom number is decreased by one.
-                if result_type == "ANISOU":
-                    atom_num -= 1
-                # The atom number is placed by starting from the right side.
-                phrase = "{}{:>5}{}".format(phrase, atom_num, line_end_part)
-                new_file.write("{}\n".format(phrase))
-                atom_num += 1
+        line_type = line[:6]
+        line_type_nes = line_type.strip()
+        if line_type_nes in ["ATOM", "HETATM", "ANISOU"]:
+            chain_id = line[21]
+            first_part = line[:6]
+            last_part = line[11:]
+            chain_id_nes = chain_id.strip()
+            # If a chain ID has been selected check whether this chain ID is the chain of the current line.
+            if chain is not None:
+                # If the line is at another chain of the one selected then continue and write this line unchanged.
+                if chain != chain_id_nes:
+                    new_line = "{}\n".format(line)
+                    new_file.write(new_line)
+                    continue
+            if line_type_nes != "ANISOU":
+                atom_num_counter += 1
+            new_line = "{}{:>5}{}\n".format(first_part, atom_num_counter, last_part)
+            new_file.write(new_line)
+        elif line_type_nes == "TER":
+            if line[:21]:
+                chain_id = line[21]
+                first_part = line[:6]
+                last_part = line[11:]
+                chain_id_nes = chain_id.strip()
+                # If a chain ID has been selected check whether this chain ID is the chain of the current line.
+                if chain is not None:
+                    # If the line is at another chain of the one selected then continue and write this line unchanged.
+                    if chain != chain_id_nes:
+                        new_line = "{}\n".format(line)
+                        new_file.write(new_line)
+                        continue
+                if line_type_nes != "ANISOU":
+                    atom_num_counter += 1
+                new_line = "{}{:>5}{}\n".format(first_part, atom_num_counter, last_part)
+                new_file.write(new_line)
             else:
-                # For each line not catched by the pattern, it is written unchanged in the new file.
-                new_file.write("{}\n".format(line))
+                print("TER line information not found.")
         else:
-            result_atom_c = None
-            result_atom_2 = pattern_atom_2.search(line)
-            result_atom_3 = pattern_atom_3.search(line)
-            if result_atom_2:
-                result_atom_c = result_atom_2
-            elif result_atom_3:
-                result_atom_c = result_atom_2
-            else:
-                # For each line not catched by the pattern, it is written unchanged in the new file.
-                new_file.write("{}\n".format(line))
-            if result_atom_c is not None:                
-                result_atom_c = pattern_atom_2.search(line)
-                result_type = result_atom_c.group(1)
-                result_chain = result_atom_c.group(3)
-                if result_chain == chain:
-                    # Perform the change based on the starting atom number.
-                    line_end_part = result_atom_c.group(2)
-                    # Perform the change based on the starting atom number.
-                    # The first label takes 6 positions. The atom number takes 5 positions.
-                    if result_type == "ATOM":
-                        phrase = "ATOM  "
-                    elif result_type == "HETATM":
-                        phrase = "HETATM"
-                    elif result_type == "ANISOU":
-                        phrase = "ANISOU"
-                    elif result_type == "TER":
-                        phrase = "TER   "
-                    # If the current line is with teh ANISOU label then the atom number must remain the same as with the previous line,
-                    # therefore the atom number is decreased by one.
-                    if result_type == "ANISOU":
-                        atom_num -= 1
-                    # The atom number is placed by starting from the right side.
-                    phrase = "{}{:>5}{}".format(phrase, atom_num, line_end_part)
-                    new_file.write("{}\n".format(phrase))
-                    atom_num += 1
-                    print(line)
-                else:
-                    # If the line is catched by the pattern but not of the specified chain then it is written unchanged in
-                    # the new file.
-                    new_file.write("{}\n".format(line))
-
+            new_file.write("{}\n".format(line))
     # Close the new file.
     new_file.close()
 
@@ -118,7 +122,7 @@ def atomnum(input_path, chain, start_number, output_path):
 if __name__ == "__main__":
     arg_input_path = None
     arg_chain = None
-    arg_start_number = 1
+    arg_start_number = 0
     arg_output_path = None
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv), 2):
@@ -130,4 +134,4 @@ if __name__ == "__main__":
                 arg_start_number = int(sys.argv[i+1])
             elif sys.argv[i] == "-o" or sys.argv[i] == "--output":
                 arg_output_path = sys.argv[i+1]
-    atomnum(arg_input_path, arg_chain, arg_start_number, arg_output_path)
+    chainnum(arg_input_path, arg_chain, arg_start_number, arg_output_path)
