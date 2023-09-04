@@ -9,7 +9,7 @@ PDB_Chain_Numbering.py:<br />
 Numbers the residues of all the chains of the the PDB file or of a specific chain starting from a specific number. The numbering does not change based on the chain IDs. For example, if the file contains three chains A, B and C and there are HETATM lines for CU for each chain, which lines in the input file have residue numbers that continue after the last residue number of their respective chain IDs (e.g., CU A 154, CU B 154, CU C 154), then in this case the residue numbering for these HETATM lines is still based on the steady increament (by 1) of the previous value of the counter (e.g., they will become CU A 721, CU B 722, CU C 723). I am working on providing a script that will be changing the residue numbers according to the numbering of their respective chains (which is not the exact purpose of PDB_Chain_Numbering.py).
 
 # Options
-All scripts have been tested with Python 3.9.7.
+All scripts have been tested with Python 3.9.7.<br />
 All scripts have been built for the "Atomic Coordinate Entry Format Description Version 3.30" of PDB.
 
 ## Command-line
